@@ -1,0 +1,32 @@
+{
+    "name": "apis",
+    "version": "1.0.0",
+    "description": "The back-end part.",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start": "nodemon server.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/pedrocasteli/name-and-age-react.git"
+    },
+    "keywords": [
+        "express",
+        "mongo",
+        "mongoose",
+        "node"
+    ],
+    "author": "Pedro Marchetti Casteli",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/pedrocasteli/name-and-age-react/issues"
+    },
+    "homepage": "https://github.com/pedrocasteli/name-and-age-react#readme",
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^16.0.1",
+        "express": "^4.18.1",
+        "mongoose": "^6.5.2"
+    }
+}

@@ -1,13 +1,14 @@
+import React from "react";
 import Card from "./components/Card";
 import Form from "./components/Form";
 
 const App = () => {
     return (
-        <div className="App">
+        <React.Fragment>
             <Card>
                 <Form />
             </Card>
-        </div>
+        </React.Fragment>
     );
 };
 
