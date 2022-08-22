@@ -7,6 +7,8 @@ import spinnerIcon from "../assets/spinner.svg";
 
 import "./Form.scss";
 
+// Todos esses states estão uma confusão. Preciso ajeitar eles melhor e/ou usar useReducer()
+
 const Form = () => {
     const [nameInput, setNameInput] = useState("");
     const [ageInput, setAgeInput] = useState("");
