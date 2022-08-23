@@ -6,75 +6,103 @@ import spinnerIcon from "../assets/spinner.svg";
 
 import "./Form.scss";
 
-const nameReducer = (state, action) => {
+const formReducer = (state, action) => {
     switch (action.type) {
-        case "USER_INPUT":
-            return { value: action.payload, isValid: action.payload !== "" };
-        case "API_RETURN":
+        case "USERNAME_INPUT":
             return {
-                value: state.value,
-                isValid: !action.payload,
+                ...state,
+                usernameValue: action.payload,
+            };
+        case "API_RETURN_USERNAME":
+            return {
+                ...state,
+                usernameValue: action.payload.match
+                    ? action.payload.username
+                    : "",
+                usernameIsValid: !action.payload.match,
+                emailValue: action.payload.match ? action.payload.email : "",
+                emailIsValid: !action.payload.email,
                 apiReturned: true,
             };
+        case "EMAIL_INPUT":
+            return {
+                ...state,
+                emailValue: action.payload.value,
+                emailIsValid: action.payload.isValid,
+                formIsValid: action.payload.isValid && state.usernameIsValid,
+            };
         default:
-            return { value: "", isValid: false, apiReturned: false };
+            return {
+                usernameValue: "",
+                emailValue: "",
+                usernameIsValid: false,
+                emailIsValid: false,
+                formIsValid: false,
+                apiReturned: false,
+            };
     }
 };
 
 const Form = () => {
-    const [emailInput, setEmailInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const [nameState, dispatchName] = useReducer(nameReducer, {
-        value: "",
-        isValid: false,
+    const [formState, dispatchForm] = useReducer(formReducer, {
+        usernameValue: "",
+        emailValue: "",
+        usernameIsValid: false,
+        emailIsValid: false,
+        formIsValid: false,
+        apiReturned: false,
     });
 
     useEffect(() => {
-        if (nameState.value === "") {
+        if (formState.usernameValue === "") {
             setIsLoading(false);
         } else {
             setIsLoading(true);
             const myTimer = setTimeout(() => {
-                fetch(`http://localhost:3002/people/${nameState.value}`)
+                fetch(`http://localhost:3002/people/${formState.usernameValue}`)
                     .then((result) => {
                         return result.json();
                     })
                     .then((data) => {
                         setIsLoading(false);
-                        dispatchName({
-                            type: "API_RETURN",
-                            payload: data.match,
+                        dispatchForm({
+                            type: "API_RETURN_USERNAME",
+                            payload: data,
                         });
                     });
             }, 500);
 
             return () => clearTimeout(myTimer);
         }
-    }, [nameState.value]);
+    }, [formState.usernameValue]);
 
-    const changeNameHandler = (event) => {
-        dispatchName({ type: "USER_INPUT", payload: event.target.value });
+    const changeUsernameHandler = (event) => {
+        dispatchForm({ type: "USERNAME_INPUT", payload: event.target.value });
     };
 
     const changeEmailHandler = (event) => {
-        if (emailInput === "") {
-            return;
-        }
-        setEmailInput(event.target.value);
+        dispatchForm({
+            type: "EMAIL_INPUT",
+            payload: {
+                value: event.target.value,
+                isValid: event.target.checkValidity(),
+            },
+        });
     };
 
     return (
         <form className="form">
             <section className="form__section">
-                <label htmlFor="name">Nome</label>
+                <label htmlFor="username">Usuário</label>
                 <div className="form__search">
                     <input
-                        id="name"
-                        name="name"
+                        id="username"
+                        name="username"
                         type="text"
-                        value={nameState.value}
-                        onChange={changeNameHandler}
+                        defaultValue={formState.usernameValue}
+                        onChange={changeUsernameHandler}
                         className="form__input"
                         required
                     ></input>
@@ -87,7 +115,7 @@ const Form = () => {
                             className="form__image form__image--spinner"
                         />
                     )}
-                    {!isLoading && nameState.isValid && (
+                    {!isLoading && formState.usernameIsValid && (
                         <img
                             src={checkIcon}
                             alt={"Check icon"}
@@ -97,8 +125,8 @@ const Form = () => {
                         />
                     )}
                     {!isLoading &&
-                        nameState.apiReturned &&
-                        !nameState.isValid && (
+                        formState.apiReturned &&
+                        !formState.usernameIsValid && (
                             <img
                                 src={crossIcon}
                                 alt={"Cross icon"}
@@ -116,15 +144,19 @@ const Form = () => {
                         id="email"
                         name="email"
                         type="email"
-                        value={emailInput}
+                        defaultValue={formState.emailValue}
                         onChange={changeEmailHandler}
                         className="form__input"
+                        disabled={!formState.usernameIsValid}
                         required
-                        disabled
                     ></input>
                 </div>
             </section>
-            <button type="submit" className="form__button" disabled>
+            <button
+                type="submit"
+                className="form__button"
+                disabled={!formState.formIsValid}
+            >
                 Enviar
             </button>
         </form>

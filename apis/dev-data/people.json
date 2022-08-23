@@ -1,18 +1,21 @@
 [
     {
         "id": 1,
+        "username": "joaodasilva",
         "name": "João da Silva",
         "email": "joaosilva@email.com",
         "age": 24
     },
     {
         "id": 2,
+        "username": "anamoura",
         "name": "Ana Moura",
         "email": "aninham@email.com",
         "age": 21
     },
     {
         "id": 3,
+        "username": "pauloandresouza",
         "name": "Paulo André Souza",
         "email": "pauloandre@email.com",
         "age": 31
