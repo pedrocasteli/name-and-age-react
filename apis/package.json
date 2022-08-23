@@ -13,8 +13,6 @@
     },
     "keywords": [
         "express",
-        "mongo",
-        "mongoose",
         "node"
     ],
     "author": "Pedro Marchetti Casteli",

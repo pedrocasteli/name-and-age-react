@@ -1,66 +1,67 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 
-import warningIcon from "../assets/warning.svg";
 import checkIcon from "../assets/check.svg";
 import crossIcon from "../assets/cross.svg";
 import spinnerIcon from "../assets/spinner.svg";
 
 import "./Form.scss";
 
-// Todos esses states estão uma confusão. Preciso ajeitar eles melhor e/ou usar useReducer()
+const nameReducer = (state, action) => {
+    switch (action.type) {
+        case "USER_INPUT":
+            return { value: action.payload, isValid: action.payload !== "" };
+        case "API_RETURN":
+            return {
+                value: state.value,
+                isValid: !action.payload,
+                apiReturned: true,
+            };
+        default:
+            return { value: "", isValid: false, apiReturned: false };
+    }
+};
 
 const Form = () => {
-    const [nameInput, setNameInput] = useState("");
-    const [ageInput, setAgeInput] = useState("");
-    const [nameExists, setNameExists] = useState(false);
-    const [nameIsEmpty, setNameIsEmpty] = useState(true);
+    const [emailInput, setEmailInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [formIsValid, setFormIsValid] = useState(false);
-    const [user, setUser] = useState({ data: [{ age: "" }] });
-    const [userExists, setUserExists] = useState(false);
+
+    const [nameState, dispatchName] = useReducer(nameReducer, {
+        value: "",
+        isValid: false,
+    });
 
     useEffect(() => {
-        if (nameInput === "") {
-            setNameIsEmpty(true);
+        if (nameState.value === "") {
             setIsLoading(false);
         } else {
             setIsLoading(true);
             const myTimer = setTimeout(() => {
-                fetch(`http://localhost:3002/people/${nameInput}`)
+                fetch(`http://localhost:3002/people/${nameState.value}`)
                     .then((result) => {
                         return result.json();
                     })
                     .then((data) => {
                         setIsLoading(false);
-                        if (data.match) {
-                            setUser(data);
-                            setNameExists(true);
-                            setNameIsEmpty(false);
-                        } else {
-                            setNameExists(false);
-                            setNameIsEmpty(false);
-                        }
+                        dispatchName({
+                            type: "API_RETURN",
+                            payload: data.match,
+                        });
                     });
             }, 500);
 
             return () => clearTimeout(myTimer);
         }
-    }, [nameInput]);
-
-    useEffect(() => {
-        if (user.data[0].age === parseInt(ageInput)) {
-            setUserExists(true);
-        } else {
-            setUserExists(false);
-        }
-    }, [ageInput]);
+    }, [nameState.value]);
 
     const changeNameHandler = (event) => {
-        setNameInput(event.target.value);
+        dispatchName({ type: "USER_INPUT", payload: event.target.value });
     };
 
-    const changeAgeHandler = (event) => {
-        setAgeInput(event.target.value);
+    const changeEmailHandler = (event) => {
+        if (emailInput === "") {
+            return;
+        }
+        setEmailInput(event.target.value);
     };
 
     return (
@@ -72,36 +73,12 @@ const Form = () => {
                         id="name"
                         name="name"
                         type="text"
-                        value={nameInput}
+                        value={nameState.value}
                         onChange={changeNameHandler}
                         className="form__input"
                         required
                     ></input>
-                    {!nameIsEmpty &&
-                        nameExists &&
-                        !isLoading &&
-                        !userExists && (
-                            <img
-                                src={warningIcon}
-                                alt={"Warning icon"}
-                                height={20}
-                                width={20}
-                                className="form__image"
-                            />
-                        )}
-                    {!nameIsEmpty &&
-                        !nameExists &&
-                        !isLoading &&
-                        !userExists && (
-                            <img
-                                src={checkIcon}
-                                alt={"Check icon"}
-                                height={20}
-                                width={20}
-                                className="form__image"
-                            />
-                        )}
-                    {isLoading && !userExists && (
+                    {isLoading && (
                         <img
                             src={spinnerIcon}
                             alt={"Spinner icon"}
@@ -110,48 +87,21 @@ const Form = () => {
                             className="form__image form__image--spinner"
                         />
                     )}
-                    {userExists && (
+                    {!isLoading && nameState.isValid && (
                         <img
-                            src={crossIcon}
-                            alt={"Cross icon"}
+                            src={checkIcon}
+                            alt={"Check icon"}
                             height={20}
                             width={20}
                             className="form__image"
                         />
                     )}
-                </div>
-            </section>
-            <section className="form__section">
-                <label htmlFor="age">Idade</label>
-                <div className="form__search">
-                    <input
-                        id="age"
-                        name="age"
-                        type="number"
-                        value={ageInput}
-                        onChange={changeAgeHandler}
-                        min="1"
-                        max="110"
-                        className="form__input"
-                        required
-                        disabled={nameIsEmpty || isLoading}
-                    ></input>
-                    {userExists && (
-                        <img
-                            src={crossIcon}
-                            alt={"Cross icon"}
-                            height={20}
-                            width={20}
-                            className="form__image"
-                        />
-                    )}
-                    {!nameIsEmpty &&
-                        !nameExists &&
-                        !isLoading &&
-                        !userExists && (
+                    {!isLoading &&
+                        nameState.apiReturned &&
+                        !nameState.isValid && (
                             <img
-                                src={checkIcon}
-                                alt={"Check icon"}
+                                src={crossIcon}
+                                alt={"Cross icon"}
                                 height={20}
                                 width={20}
                                 className="form__image"
@@ -159,11 +109,22 @@ const Form = () => {
                         )}
                 </div>
             </section>
-            <button
-                type="submit"
-                className="form__button"
-                disabled={!formIsValid}
-            >
+            <section className="form__section">
+                <label htmlFor="age">E-mail</label>
+                <div className="form__search">
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={emailInput}
+                        onChange={changeEmailHandler}
+                        className="form__input"
+                        required
+                        disabled
+                    ></input>
+                </div>
+            </section>
+            <button type="submit" className="form__button" disabled>
                 Enviar
             </button>
         </form>
