@@ -10,12 +10,10 @@ const formReducer = (state, action) => {
     switch (action.type) {
         case "USERNAME_INPUT":
             return {
-                ...state,
                 usernameValue: action.payload,
             };
         case "API_RETURN_USERNAME":
             return {
-                ...state,
                 usernameValue: action.payload.match
                     ? action.payload.username
                     : "",
