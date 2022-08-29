@@ -9,6 +9,7 @@ const Modal = (props) => {
         ? ReactDOM.createPortal(
               <div className={styles.backdrop} onClick={props.onClose}>
                   <div className={styles.modal}>
+                      <h1>Dados enviados!</h1>
                       <img
                           src={okGIF}
                           alt="GIF of a man giving the camera 'thumbs up'."
