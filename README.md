@@ -2,7 +2,7 @@
 
 ### _A form validated by ***React***, ***Express*** and ***HTML5***, using `.json` files as "database"_
 
-This application provides a simple webpage with two input fields and a _send_ button. It was built using **_React and CSS (Flexbox and Grid) with Sass_**. On every keystroke on the **username** input, a custom **_Express API_** checks for matches in the `.json` files. If a **username** match is found, the **email** input cannot be edited, and the form cannot be submited. If no matches are found, however, the user can enter an **email** wich will is validate using a native HTML5 function. If the **email** entered is valid, the **form** can be submited.
+This application provides a simple webpage with two input fields and a _send_ button. It was built using **_React and CSS (Flexbox and Grid) with Sass_**. On every keystroke on the **username** input, a custom **_Express API_** checks for matches in the `.json` files. If a **username** match is found, the **email** input cannot be edited, and the form cannot be submited. If no matches are found, however, the user can enter an **email** wich validates using a native HTML5 function. If the **email** entered is valid, the **form** can be submited.
 
 ## Tech
 
