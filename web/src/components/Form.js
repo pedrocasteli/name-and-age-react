@@ -11,14 +11,18 @@ const formReducer = (state, action) => {
     switch (action.type) {
         case "USERNAME_INPUT":
             return {
+                ...state,
                 usernameValue: action.payload,
+                apiReturned: false,
+                usernameIsValid: action.payload === "" && false,
+                emailValue: "",
             };
         case "API_RETURN_USERNAME":
             return {
                 ...state,
                 usernameValue: action.payload.match
                     ? action.payload.username
-                    : "",
+                    : state.usernameValue,
                 usernameIsValid: !action.payload.match,
                 emailValue: action.payload.match ? action.payload.email : "",
                 emailIsValid: !action.payload.email,
@@ -30,17 +34,9 @@ const formReducer = (state, action) => {
                 emailValue: action.payload.value,
                 emailIsValid: action.payload.isValid,
                 formIsValid: action.payload.isValid && state.usernameIsValid,
-                apiReturned: false,
             };
         default:
-            return {
-                usernameValue: "",
-                emailValue: "",
-                usernameIsValid: false,
-                emailIsValid: false,
-                formIsValid: false,
-                apiReturned: false,
-            };
+            return state;
     }
 };
 
@@ -58,9 +54,7 @@ const Form = () => {
     });
 
     useEffect(() => {
-        if (formState.usernameValue === "") {
-            setIsLoading(false);
-        } else {
+        if (formState.usernameValue !== "") {
             setIsLoading(true);
             const myTimer = setTimeout(() => {
                 fetch(`http://localhost:3002/people/${formState.usernameValue}`)
@@ -73,11 +67,12 @@ const Form = () => {
                             type: "API_RETURN_USERNAME",
                             payload: data,
                         });
-                        console.log(data);
                     });
             }, 500);
 
             return () => clearTimeout(myTimer);
+        } else {
+            setIsLoading(false);
         }
     }, [formState.usernameValue]);
 
@@ -110,7 +105,7 @@ const Form = () => {
                             id="username"
                             name="username"
                             type="text"
-                            defaultValue={formState.usernameValue}
+                            value={formState.usernameValue}
                             onChange={changeUsernameHandler}
                             className="form__input"
                             required
@@ -124,15 +119,17 @@ const Form = () => {
                                 className="form__image form__image--spinner"
                             />
                         )}
-                        {!isLoading && formState.usernameIsValid && (
-                            <img
-                                src={checkIcon}
-                                alt={"Check icon"}
-                                height={20}
-                                width={20}
-                                className="form__image"
-                            />
-                        )}
+                        {!isLoading &&
+                            formState.apiReturned &&
+                            formState.usernameIsValid && (
+                                <img
+                                    src={checkIcon}
+                                    alt={"Check icon"}
+                                    height={20}
+                                    width={20}
+                                    className="form__image"
+                                />
+                            )}
                         {!isLoading &&
                             formState.apiReturned &&
                             !formState.usernameIsValid && (
@@ -153,7 +150,7 @@ const Form = () => {
                             id="email"
                             name="email"
                             type="email"
-                            defaultValue={formState.emailValue}
+                            value={formState.emailValue}
                             onChange={changeEmailHandler}
                             className="form__input"
                             disabled={!formState.usernameIsValid}
